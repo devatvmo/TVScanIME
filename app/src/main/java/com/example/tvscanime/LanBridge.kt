@@ -56,27 +56,31 @@ class LanBridge private constructor(context: Context) {
     fun getUrl(): String = "http://${ipAddress()}:8766/"
 
     /** Finds an IPv4 address on an active LAN interface (Wi-Fi or Ethernet). */
-    private fun ipAddress(): String = try {
-        val interfaces = NetworkInterface.getNetworkInterfaces() ?: return "127.0.0.1"
-        val candidates = Collections.list(interfaces)
-            .filter { it.isUp && !it.isLoopback }
-            .flatMap { network ->
-                Collections.list(network.inetAddresses)
-                    .filterIsInstance<Inet4Address>()
-                    .filter { !it.isLoopbackAddress && !it.isLinkLocalAddress }
-                    .map { network.name.lowercase() to it.hostAddress }
-            }
-        candidates.sortedBy { (name, _) ->
-            when {
-                name.startsWith("wlan") -> 0
-                name.startsWith("eth") -> 1
-                name.startsWith("en") -> 2
-                name.startsWith("rmnet") -> 4
-                name.startsWith("tun") -> 5
-                else -> 3
-            }
-        }.firstOrNull()?.second ?: "127.0.0.1"
-    } catch (_: Exception) { "127.0.0.1" }
+    private fun ipAddress(): String {
+        return try {
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return "127.0.0.1"
+            val candidates = Collections.list(interfaces)
+                .filter { it.isUp && !it.isLoopback }
+                .flatMap { network ->
+                    Collections.list(network.inetAddresses)
+                        .filterIsInstance<Inet4Address>()
+                        .filter { !it.isLoopbackAddress && !it.isLinkLocalAddress }
+                        .map { network.name.lowercase() to it.hostAddress }
+                }
+            candidates.sortedBy { (name, _) ->
+                when {
+                    name.startsWith("wlan") -> 0
+                    name.startsWith("eth") -> 1
+                    name.startsWith("en") -> 2
+                    name.startsWith("rmnet") -> 4
+                    name.startsWith("tun") -> 5
+                    else -> 3
+                }
+            }.firstOrNull()?.second ?: "127.0.0.1"
+        } catch (_: Exception) {
+            "127.0.0.1"
+        }
+    }
 
     private fun broadcast(message: String) {
         try {
