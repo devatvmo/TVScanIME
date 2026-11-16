@@ -8,7 +8,7 @@ TVScanIME is a native Android input method for Android TV and Android TV 14 set-
 - Opens a mobile browser page from the QR code; the phone uses its own system keyboard, including Chinese/English input and voice dictation.
 - Synchronizes text to the TV over the local network.
 - Provides backspace, clear, confirm, dismiss, and cursor movement actions.
-- Uses a random pairing token in the QR URL and WebSocket messages.
+- Shows the TV's current LAN IPv4 address and HTTP port in the IME panel; the QR code opens that address directly.
 
 ## Project status
 The Android-side entry activity, LAN bridge, and IME service are Kotlin. The phone input page remains HTML/CSS/JavaScript. **A successful build and physical Android TV 14 validation are still pending.** GitHub Actions builds a debug APK on pushes and pull requests; only a successful run verifies compilation.
@@ -50,14 +50,14 @@ If using wireless debugging, use the IP and port displayed by the TV's Wireless 
 ## Network and security
 - HTTP page: TCP port `8766`.
 - WebSocket: TCP port `8765`.
-- Traffic currently uses plain HTTP/WebSocket on the local network. The random pairing token reduces accidental connections but is **not** encryption or end-to-end security.
+- Traffic currently uses plain HTTP/WebSocket on the local network. There is no pairing code or access token; any device that can reach the TV on the same network can open the page and send input.
 - Use only on a trusted private network. Do not forward these ports to the public internet.
-- Some TV firmware may report an unusable LAN IP such as `0.0.0.0`; device-specific network adaptation may be needed.
+- If no active LAN IPv4 address is found, the displayed fallback is `127.0.0.1`, which is only reachable from the TV itself; check that Wi-Fi or Ethernet is connected.
 
 ## Known limitations
 - Vendor firmware can customize IME panel sizing, lifecycle, network APIs, and background execution.
 - The current code is a prototype; compatibility and input behavior must be tested on the target box.
-- The displayed six-digit/manual pairing feature is not implemented; pairing is performed by scanning the QR code.
+- The QR code contains the direct `http://<TV-LAN-IP>:8766/` address; there is no pairing-code step.
 
 ## Documentation
 - [Project structure](docs/PROJECT_STRUCTURE.md)

@@ -1,15 +1,15 @@
 package com.example.tvscanime
 
 import android.content.Context
-import android.net.wifi.WifiManager
-import android.text.format.Formatter
 import fi.iki.elonen.NanoHTTPD
 import org.java_websocket.WebSocket
 import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
 import org.json.JSONObject
+import java.net.Inet4Address
 import java.net.InetSocketAddress
-import java.security.SecureRandom
+import java.net.NetworkInterface
+import java.util.Collections
 
 class LanBridge private constructor(context: Context) {
     interface Listener {
@@ -25,8 +25,6 @@ class LanBridge private constructor(context: Context) {
     }
 
     private val appContext = context.applicationContext
-    private val token = ByteArray(16).also { SecureRandom().nextBytes(it) }
-        .joinToString("") { "%02x".format(it) }
     @Volatile private var listener: Listener? = null
     @Volatile private var http: HttpServer? = null
     @Volatile private var socket: SocketServer? = null
@@ -55,14 +53,29 @@ class LanBridge private constructor(context: Context) {
         }
     }
 
-    fun getUrl(): String = "http://${ipAddress()}:8766/?t=$token"
+    fun getUrl(): String = "http://${ipAddress()}:8766/"
 
-    @Suppress("DEPRECATION")
+    /** Finds an IPv4 address on an active LAN interface (Wi-Fi or Ethernet). */
     private fun ipAddress(): String = try {
-        val wifi = appContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        Formatter.formatIpAddress(wifi.connectionInfo.ipAddress).takeIf {
-            it != "0.0.0.0" && it != "127.0.0.1"
-        } ?: "127.0.0.1"
+        val interfaces = NetworkInterface.getNetworkInterfaces() ?: return "127.0.0.1"
+        val candidates = Collections.list(interfaces)
+            .filter { it.isUp && !it.isLoopback }
+            .flatMap { network ->
+                Collections.list(network.inetAddresses)
+                    .filterIsInstance<Inet4Address>()
+                    .filter { !it.isLoopbackAddress && !it.isLinkLocalAddress }
+                    .map { network.name.lowercase() to it.hostAddress }
+            }
+        candidates.sortedBy { (name, _) ->
+            when {
+                name.startsWith("wlan") -> 0
+                name.startsWith("eth") -> 1
+                name.startsWith("en") -> 2
+                name.startsWith("rmnet") -> 4
+                name.startsWith("tun") -> 5
+                else -> 3
+            }
+        }.firstOrNull()?.second ?: "127.0.0.1"
     } catch (_: Exception) { "127.0.0.1" }
 
     private fun broadcast(message: String) {
@@ -73,12 +86,6 @@ class LanBridge private constructor(context: Context) {
 
     private inner class HttpServer : NanoHTTPD("0.0.0.0", 8766) {
         override fun serve(session: IHTTPSession): Response {
-            val supplied = session.parameters["t"]?.firstOrNull()
-            if (supplied != token) {
-                return newFixedLengthResponse(
-                    Response.Status.FORBIDDEN, "text/plain", "Pairing token required"
-                )
-            }
             return newFixedLengthResponse(
                 Response.Status.OK, "text/html; charset=utf-8", PhonePage.HTML
             )
@@ -92,10 +99,6 @@ class LanBridge private constructor(context: Context) {
         override fun onMessage(connection: WebSocket, message: String) {
             try {
                 val data = JSONObject(message)
-                if (data.optString("token") != token) {
-                    connection.close()
-                    return
-                }
                 when (data.optString("type")) {
                     "text" -> {
                         val value = data.optString("value", "")

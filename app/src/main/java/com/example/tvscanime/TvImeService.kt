@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -20,6 +21,8 @@ import com.google.zxing.common.BitMatrix
 class TvImeService : InputMethodService(), LanBridge.Listener {
     private var preview: TextView? = null
     private var status: TextView? = null
+    private var addressView: TextView? = null
+    private var qrImage: ImageView? = null
     private lateinit var bridge: LanBridge
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -61,6 +64,7 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
             } catch (_: Exception) { }
             contentDescription = "扫码连接手机输入页面"
         }
+        qrImage = qrView
         qrCard.addView(qrView, LinearLayout.LayoutParams(dp(196), dp(196)))
         shell.addView(qrCard, LinearLayout.LayoutParams(dp(214), dp(214)))
 
@@ -96,6 +100,13 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
             setPadding(0, dp(13), 0, dp(9))
         }
         right.addView(status)
+        addressView = TextView(this).apply {
+            text = bridge.getUrl()
+            setTextColor(0xff8fb7f0.toInt())
+            textSize = 13f
+            setPadding(0, dp(5), 0, dp(2))
+        }
+        right.addView(addressView)
         right.addView(preview)
         right.addView(TextView(this).apply {
             text = "手机与电视需连接同一 Wi-Fi"
@@ -104,6 +115,18 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         })
         shell.addView(right, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         return shell
+    }
+
+    // TV emulators often report a hardware keyboard, which suppresses the IME panel by default.
+    // This IME is designed to show its QR panel even when a hardware keyboard is present.
+    override fun onEvaluateInputViewShown(): Boolean = true
+
+    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        super.onStartInputView(info, restarting)
+        bridge.start()
+        val url = bridge.getUrl()
+        addressView?.text = url
+        try { qrImage?.setImageBitmap(makeQr(url, 196)) } catch (_: Exception) { }
     }
 
     override fun onDestroy() {

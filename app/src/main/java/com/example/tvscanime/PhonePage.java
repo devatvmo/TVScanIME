@@ -66,7 +66,7 @@ button.primary{border:0;background:linear-gradient(135deg,#5798ff,#466de7);color
 <div class="foot"><span>⌁</span> 仅在本地网络传输 · 无需安装手机 App</div>
 </main>
 <script>
-const token=new URLSearchParams(location.search).get('t'),ta=document.getElementById('t'),statusEl=document.getElementById('status'),dot=document.getElementById('dot'),count=document.getElementById('count');
+const ta=document.getElementById('t'),statusEl=document.getElementById('status'),dot=document.getElementById('dot'),count=document.getElementById('count');
 let ws,timer,connected=false;
 function connect(){ws=new WebSocket('ws://'+location.hostname+':8765);
  ws.onopen=()=>{connected=true;statusEl.textContent='已连接';dot.classList.add('on');send('text',ta.value)};
@@ -74,7 +74,7 @@ function connect(){ws=new WebSocket('ws://'+location.hostname+':8765);
  ws.onerror=()=>{statusEl.textContent='连接异常'};
  ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.type==='sync'&&m.value!==ta.value){ta.value=m.value;updateCount()}}catch(_){}};
 }
-function send(type,value){if(ws&&ws.readyState===1)ws.send(JSON.stringify({type,value,token}))}
+function send(type,value){if(ws&&ws.readyState===1)ws.send(JSON.stringify({type,value}))}
 function updateCount(){count.textContent=ta.value.length+' 字'}
 function act(v){
  if(v==='backspace'){const a=ta.selectionStart,b=ta.selectionEnd;if(a!==b)ta.setRangeText('',a,b,'end');else if(a>0)ta.setRangeText('',a-1,a,'end');send('text',ta.value);updateCount();ta.focus();return}

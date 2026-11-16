@@ -1,6 +1,6 @@
 # Device validation checklist
 
-The source has not yet been verified by a successful Android build or on a physical Android TV 14 device. Run these checks before treating a release as stable.
+The source has not yet been validated on a physical Android TV 14 device. Run these checks before treating a release as stable.
 
 ## Build
 - [ ] Run `gradle --no-daemon assembleDebug` with JDK 17 and Android SDK 35, or use GitHub Actions.
@@ -13,7 +13,7 @@ The source has not yet been verified by a successful Android build or on a physi
 - [ ] Focus text fields in multiple apps and confirm the IME panel appears.
 - [ ] Confirm the QR code remains readable at normal TV viewing distance.
 
-## Phone pairing and input
+## LAN address and phone input
 - [ ] Connect the TV and phone to the same Wi-Fi/LAN.
 - [ ] Scan the QR code and confirm the phone browser opens the input page.
 - [ ] Confirm connection status changes to connected.
