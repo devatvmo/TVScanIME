@@ -43,9 +43,10 @@ If using wireless debugging, use the IP and port displayed by the TV's Wireless 
 ## Use
 1. Connect the TV and phone to the same Wi-Fi network.
 2. Enable and select TVScanIME in the TV's input method settings.
-3. Focus a text field in an app on the TV; the input method panel should display a QR code.
+3. Open TVScanIME from the TV launcher. The app screen displays the current LAN URL and QR code even before opening another app.
 4. Scan the QR code with the phone camera and open the page in a browser.
-5. Type using the phone's normal keyboard. Text is synchronized to the TV; use **Send to TV** to finish composing.
+5. Tap the sample input field on the TV app to verify that the IME panel appears. In other apps, focus any editable text field to show the IME.
+6. Type using the phone's normal keyboard. Text is synchronized to the TV; use **Send to TV** to finish composing.
 
 ## Network and security
 - HTTP page: TCP port `8766`.
