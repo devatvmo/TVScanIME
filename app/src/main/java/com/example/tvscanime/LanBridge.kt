@@ -30,14 +30,26 @@ class LanBridge private constructor(context: Context) {
     @Volatile private var listener: Listener? = null
     @Volatile private var http: HttpServer? = null
     @Volatile private var socket: SocketServer? = null
+    @Volatile private var currentText: String = ""
 
     fun setListener(value: Listener?) { listener = value }
+
+    fun getCurrentText(): String = currentText
+
+    fun setCurrentText(value: String?) {
+        currentText = value.orEmpty()
+        broadcast(JSONObject().put("type", "sync").put("value", currentText).toString())
+    }
 
     @Synchronized
     fun start() {
         try {
-            if (http == null) http = HttpServer().also { it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false) }
-            if (socket == null) socket = SocketServer(InetSocketAddress("0.0.0.0", 8765)).also { it.start() }
+            if (http == null) http = HttpServer().also {
+                it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+            }
+            if (socket == null) socket = SocketServer(InetSocketAddress("0.0.0.0", 8765)).also {
+                it.start()
+            }
         } catch (error: Exception) {
             error.printStackTrace()
         }
@@ -53,19 +65,30 @@ class LanBridge private constructor(context: Context) {
         } ?: "127.0.0.1"
     } catch (_: Exception) { "127.0.0.1" }
 
+    private fun broadcast(message: String) {
+        try {
+            socket?.connections?.forEach { connection -> connection.send(message) }
+        } catch (_: Exception) { }
+    }
+
     private inner class HttpServer : NanoHTTPD("0.0.0.0", 8766) {
         override fun serve(session: IHTTPSession): Response {
             val supplied = session.parameters["t"]?.firstOrNull()
             if (supplied != token) {
-                return newFixedLengthResponse(Response.Status.FORBIDDEN, "text/plain", "Pairing token required")
+                return newFixedLengthResponse(
+                    Response.Status.FORBIDDEN, "text/plain", "Pairing token required"
+                )
             }
-            return newFixedLengthResponse(Response.Status.OK, "text/html; charset=utf-8", PhonePage.HTML)
+            return newFixedLengthResponse(
+                Response.Status.OK, "text/html; charset=utf-8", PhonePage.HTML
+            )
         }
     }
 
     private inner class SocketServer(address: InetSocketAddress) : WebSocketServer(address) {
         override fun onOpen(connection: WebSocket, handshake: ClientHandshake) = Unit
         override fun onClose(connection: WebSocket, code: Int, reason: String, remote: Boolean) = Unit
+
         override fun onMessage(connection: WebSocket, message: String) {
             try {
                 val data = JSONObject(message)
@@ -74,12 +97,19 @@ class LanBridge private constructor(context: Context) {
                     return
                 }
                 when (data.optString("type")) {
-                    "text" -> listener?.onText(data.optString("value", ""))
+                    "text" -> {
+                        val value = data.optString("value", "")
+                        currentText = value
+                        listener?.onText(value)
+                    }
                     "action" -> listener?.onAction(data.optString("value"))
                 }
             } catch (_: Exception) { }
         }
-        override fun onError(connection: WebSocket?, error: Exception) { error.printStackTrace() }
+
+        override fun onError(connection: WebSocket?, error: Exception) {
+            error.printStackTrace()
+        }
         override fun onStart() = Unit
     }
 }

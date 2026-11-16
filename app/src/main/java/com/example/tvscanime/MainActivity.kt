@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -12,12 +13,14 @@ import android.widget.TextView
 class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(36, 36, 36, 36)
             setBackgroundColor(0xff101820.toInt())
         }
+
         box.addView(TextView(this).apply {
             text = "扫码输入法"
             textSize = 28f
@@ -33,11 +36,16 @@ class MainActivity : Activity() {
         })
         box.addView(Button(this).apply {
             text = "打开输入法设置"
-            setOnClickListener { startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }
+            setOnClickListener {
+                startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+            }
         })
         box.addView(Button(this).apply {
             text = "选择当前输入法"
-            setOnClickListener { startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }
+            setOnClickListener {
+                (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .showInputMethodPicker()
+            }
         })
         setContentView(box)
     }

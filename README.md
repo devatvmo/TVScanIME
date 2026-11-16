@@ -1,6 +1,6 @@
 # TVScanIME — Android TV QR-code input method
 
-TVScanIME is a prototype Android input method for Android TV and Android TV 14 set-top boxes. It lets a phone act as the keyboard through a browser, without installing a companion phone app.
+TVScanIME is a native Android input method for Android TV and Android TV 14 set-top boxes. The TV application and IME are written in Kotlin using Android framework APIs. The phone companion remains a browser page built with HTML, CSS, and JavaScript; no phone app is required.
 
 ## Features
 - Registers as an Android system input method (IME).
@@ -11,15 +11,16 @@ TVScanIME is a prototype Android input method for Android TV and Android TV 14 s
 - Uses a random pairing token in the QR URL and WebSocket messages.
 
 ## Project status
-This repository contains the first MVP source implementation. **It has not yet been confirmed to compile successfully, and it has not been validated on a physical Android TV 14 device.** The GitHub Actions workflow attempts a debug build on pushes and pull requests. A successful workflow run is required before considering the APK build verified.
+The Android-side entry activity, LAN bridge, and IME service are Kotlin. The phone input page remains HTML/CSS/JavaScript. **A successful build and physical Android TV 14 validation are still pending.** GitHub Actions builds a debug APK on pushes and pull requests; only a successful run verifies compilation.
 
 ## Requirements
 - JDK 17
 - Android SDK Platform 35 and Build Tools 35.0.0
 - Gradle 8.7
 - Android Gradle Plugin 8.6.1
+- Kotlin Android plugin 1.9.24
 
-Open the repository root in Android Studio, allow Gradle sync, and choose **Build → Build APK(s)**. Or run:
+Open the repository root in Android Studio and allow Gradle sync, then choose **Build → Build APK(s)**. Or run:
 
 ```bash
 gradle --no-daemon assembleDebug
@@ -36,6 +37,7 @@ adb shell ime list -s
 adb shell ime enable com.example.tvscanime/.TvImeService
 adb shell ime set com.example.tvscanime/.TvImeService
 ```
+
 If using wireless debugging, use the IP and port displayed by the TV's Wireless debugging screen. Do not assume the port is always `5555`.
 
 ## Use
