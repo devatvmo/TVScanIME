@@ -8,6 +8,7 @@ import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -109,7 +110,7 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         right.addView(addressView)
         right.addView(preview)
         right.addView(TextView(this).apply {
-            text = "遥控器按返回键收起输入面板"
+            text = "遥控器 OK 确认输入 · 返回键收起面板"
             setTextColor(0xff7d91aa.toInt())
             textSize = 12f
         })
@@ -127,6 +128,21 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         val url = bridge.getUrl()
         addressView?.text = url
         try { qrImage?.setImageBitmap(makeQr(url, 196)) } catch (_: Exception) { }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            val connection = currentInputConnection
+            if (connection != null) {
+                connection.finishComposingText()
+                bridge.setCurrentText("")
+                preview?.text = "已确认输入"
+                status?.text = "输入已提交"
+            }
+            return true
+        }
+        // Keep InputMethodService's built-in Back-key behavior.
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onDestroy() {
