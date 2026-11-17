@@ -35,3 +35,9 @@ The source has not yet been validated on a physical Android TV 14 device. Run th
 - [ ] Check LAN IP discovery; some vendor ROMs may report `0.0.0.0`.
 - [ ] Check whether vendor power management stops the listeners.
 - [ ] Keep ports 8765 and 8766 on a trusted private network only.
+
+## Air-mouse validation
+- [ ] Move the pointer over each launcher action and confirm a visible hover highlight appears.
+- [ ] Click each action with the air mouse and confirm it activates exactly once.
+- [ ] Move the pointer away and confirm hover styling clears unless the control still has D-pad focus.
+- [ ] Confirm pointer use does not prevent D-pad navigation or OK/Enter activation.
