@@ -14,7 +14,7 @@ The source has not yet been validated on a physical Android TV 14 device. Run th
 - [ ] Verify the first useful action is focused when the launcher opens.
 - [ ] Verify Back exits the launcher normally and does not trap the user.
 - [ ] Verify the QR code and address stay inside the TV safe area without scrolling.
-- [ ] Verify the IME panel is readable from a normal viewing distance and Back dismisses it.
+- [ ] Verify the IME panel is readable from a normal viewing distance, OK/Enter confirms input, and Back dismisses it.
 
 ## Input method
 - [ ] Confirm the IME appears in Android input method settings.
