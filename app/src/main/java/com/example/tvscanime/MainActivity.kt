@@ -1,6 +1,7 @@
 package com.example.tvscanime
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -9,8 +10,8 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
+import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -28,111 +29,184 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         bridge = LanBridge.get(this)
         bridge.start()
 
+        val wideLayout = resources.configuration.screenWidthDp >= 720
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(dp(28), dp(24), dp(28), dp(28))
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(36), dp(24), dp(36), dp(24))
             setBackgroundColor(0xff101820.toInt())
         }
 
         root.addView(TextView(this).apply {
             text = "TVScanIME"
-            textSize = 29f
+            textSize = 30f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
         })
         root.addView(TextView(this).apply {
             text = "手机扫码，使用手机键盘输入电视文字"
-            textSize = 16f
+            textSize = 17f
             setTextColor(0xffc9d4df.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, dp(8), 0, dp(18))
+            setPadding(0, dp(6), 0, dp(18))
         })
 
+        val content = LinearLayout(this).apply {
+            orientation = if (wideLayout) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+        }
+
+        val qrColumn = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(dp(16), dp(8), dp(16), dp(8))
+        }
         qrView = ImageView(this).apply {
             contentDescription = "电视局域网输入页面二维码"
             setBackgroundColor(Color.WHITE)
-            setPadding(dp(8), dp(8), dp(8), dp(8))
+            setPadding(dp(9), dp(9), dp(9), dp(9))
+            scaleType = ImageView.ScaleType.FIT_CENTER
         }
-        root.addView(qrView, LinearLayout.LayoutParams(dp(224), dp(224)))
+        val qrSize = if (wideLayout) 224 else 196
+        qrColumn.addView(qrView, LinearLayout.LayoutParams(dp(qrSize), dp(qrSize)))
 
         addressView = TextView(this).apply {
             textSize = 17f
             typeface = Typeface.MONOSPACE
             setTextColor(0xff8fb7f0.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, dp(14), 0, dp(4))
+            maxLines = 2
+            setPadding(0, dp(12), 0, dp(4))
         }
-        root.addView(addressView)
-
+        qrColumn.addView(addressView)
         networkHint = TextView(this).apply {
             textSize = 13f
             setTextColor(0xffffcc80.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, dp(4), 0, dp(12))
+            setPadding(0, dp(4), 0, dp(8))
         }
-        root.addView(networkHint)
+        qrColumn.addView(networkHint)
+        content.addView(qrColumn, if (wideLayout)
+            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+        else LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
 
-        root.addView(TextView(this).apply {
-            text = "输入框测试"
-            textSize = 15f
-            setTextColor(Color.WHITE)
-            setPadding(0, dp(8), 0, dp(6))
-        })
-
-        val testInput = EditText(this).apply {
-            hint = "点击这里，测试电视输入法…"
-            textSize = 17f
-            setTextColor(Color.WHITE)
-            setHintTextColor(0xff8293a8.toInt())
-            minLines = 2
-            gravity = Gravity.TOP or Gravity.START
-            setPadding(dp(12), dp(12), dp(12), dp(12))
-            background = GradientDrawable().apply {
-                setColor(0xff1b2a3c.toInt())
-                cornerRadius = dp(10).toFloat()
-                setStroke(dp(1), 0xff49617d.toInt())
-            }
+        val actions = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(28), dp(8), dp(28), dp(8))
         }
-        root.addView(testInput, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(92)
-        ))
-
-        root.addView(Button(this).apply {
-            text = "打开输入法设置"
-            setOnClickListener {
-                startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
-            }
+        actions.addView(TextView(this).apply {
+            text = "使用方法"
+            textSize = 22f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
         })
-        root.addView(Button(this).apply {
-            text = "选择当前输入法"
-            setOnClickListener {
-                (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
-                    .showInputMethodPicker()
-            }
+        actions.addView(TextView(this).apply {
+            text = "1. 手机和电视连接同一个 Wi-Fi 或局域网\n2. 手机扫描左侧二维码\n3. 在手机网页输入，文字会同步到电视"
+            textSize = 16f
+            setTextColor(0xffc9d4df.toInt())
+            setLineSpacing(dp(5).toFloat(), 1f)
+            setPadding(0, dp(10), 0, dp(18))
         })
 
-        root.addView(TextView(this).apply {
-            text = "手机和电视需连接同一个 Wi-Fi。扫码页面无需配对码。"
-            textSize = 12f
+        val testButton = actionButton("测试输入法") { showImeTestDialog() }
+        val pickerButton = actionButton("选择当前输入法") {
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
+        }
+        val settingsButton = actionButton("打开输入法设置") {
+            startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+        }
+        actions.addView(testButton)
+        actions.addView(pickerButton)
+        actions.addView(settingsButton)
+        actions.addView(TextView(this).apply {
+            text = "遥控器：方向键移动焦点 · OK 确认 · 返回退出"
+            textSize = 13f
             setTextColor(0xff8293a8.toInt())
-            gravity = Gravity.CENTER
-            setPadding(0, dp(12), 0, 0)
+            setPadding(0, dp(14), 0, 0)
         })
+        content.addView(actions, if (wideLayout)
+            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+        else LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
 
-        val scroll = ScrollView(this).apply { addView(root) }
-        setContentView(scroll)
+        if (wideLayout) {
+            root.addView(content, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+            ))
+            setContentView(root)
+        } else {
+            val scroll = ScrollView(this).apply { addView(root) }
+            root.addView(content)
+            setContentView(scroll)
+        }
+
+        testButton.requestFocus()
         refreshConnectionInfo()
     }
 
     override fun onResume() {
         super.onResume()
         if (::bridge.isInitialized) refreshConnectionInfo()
+    }
+
+    private fun actionButton(label: String, action: () -> Unit): TextView {
+        return TextView(this).apply {
+            text = label
+            textSize = 18f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            isFocusable = true
+            isFocusableInTouchMode = true
+            isClickable = true
+            setTextColor(Color.WHITE)
+            setPadding(dp(18), dp(13), dp(18), dp(13))
+            background = actionBackground(false)
+            setOnFocusChangeListener { view, focused ->
+                view.background = actionBackground(focused)
+                view.scaleX = if (focused) 1.035f else 1f
+                view.scaleY = if (focused) 1.035f else 1f
+            }
+            setOnClickListener { action() }
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.bottomMargin = dp(12)
+            layoutParams = params
+        }
+    }
+
+    private fun actionBackground(focused: Boolean) = GradientDrawable().apply {
+        setColor(if (focused) 0xff28558a.toInt() else 0xff1b2a3c.toInt())
+        cornerRadius = dp(12).toFloat()
+        setStroke(dp(if (focused) 3 else 1),
+            if (focused) 0xffa9d0ff.toInt() else 0xff49617d.toInt())
+    }
+
+    private fun showImeTestDialog() {
+        val input = EditText(this).apply {
+            hint = "在这里输入，检查电视输入法"
+            textSize = 18f
+            setSingleLine(true)
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("输入法测试")
+            .setMessage("如果 TVScanIME 已设为当前输入法，点击输入框后应显示扫码面板。")
+            .setView(input)
+            .setPositiveButton("完成", null)
+            .setNegativeButton("关闭", null)
+            .create()
+        dialog.setOnShowListener {
+            input.requestFocus()
+            input.post {
+                (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .showSoftInput(input, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+        dialog.show()
     }
 
     private fun refreshConnectionInfo() {
@@ -147,14 +221,10 @@ class MainActivity : Activity() {
     }
 
     private fun makeQr(value: String, size: Int): Bitmap {
-        val matrix: BitMatrix = MultiFormatWriter().encode(
-            value, BarcodeFormat.QR_CODE, size, size
-        )
+        val matrix: BitMatrix = MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, size, size)
         return Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565).also { bitmap ->
-            for (x in 0 until size) {
-                for (y in 0 until size) {
-                    bitmap.setPixel(x, y, if (matrix[x, y]) Color.BLACK else Color.WHITE)
-                }
+            for (x in 0 until size) for (y in 0 until size) {
+                bitmap.setPixel(x, y, if (matrix[x, y]) Color.BLACK else Color.WHITE)
             }
         }
     }
