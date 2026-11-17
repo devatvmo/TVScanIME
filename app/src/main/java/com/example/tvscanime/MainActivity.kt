@@ -124,7 +124,7 @@ class MainActivity : Activity() {
         actions.addView(pickerButton)
         actions.addView(settingsButton)
         actions.addView(TextView(this).apply {
-            text = "遥控器：方向键移动焦点 · OK 确认 · 返回退出"
+            text = "十字键：方向键移动焦点 · OK 确认\n飞鼠：指针悬停高亮 · 单击操作 · 返回退出"
             textSize = 13f
             setTextColor(0xff8293a8.toInt())
             setPadding(0, dp(14), 0, 0)
@@ -169,6 +169,15 @@ class MainActivity : Activity() {
                 view.background = actionBackground(focused)
                 view.scaleX = if (focused) 1.035f else 1f
                 view.scaleY = if (focused) 1.035f else 1f
+            }
+            setOnHoverListener { view, event ->
+                val hovering = event.action == android.view.MotionEvent.ACTION_HOVER_ENTER ||
+                    event.action == android.view.MotionEvent.ACTION_HOVER_MOVE
+                val active = hovering || view.hasFocus()
+                view.background = actionBackground(active)
+                view.scaleX = if (active) 1.035f else 1f
+                view.scaleY = if (active) 1.035f else 1f
+                false
             }
             setOnClickListener { action() }
             val params = LinearLayout.LayoutParams(
