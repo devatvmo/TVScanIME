@@ -7,6 +7,15 @@ The source has not yet been validated on a physical Android TV 14 device. Run th
 - [ ] Confirm `app/build/outputs/apk/debug/app-debug.apk` is produced.
 - [ ] Install the APK on the target TV box.
 
+## TV layout and remote control
+- [ ] Verify the launcher uses a two-column landscape layout on a 16:9 TV.
+- [ ] Verify all primary actions are reachable with Up/Down and selectable with OK/Enter.
+- [ ] Verify the focused action has a clear high-contrast outline/background.
+- [ ] Verify the first useful action is focused when the launcher opens.
+- [ ] Verify Back exits the launcher normally and does not trap the user.
+- [ ] Verify the QR code and address stay inside the TV safe area without scrolling.
+- [ ] Verify the IME panel is readable from a normal viewing distance and Back dismisses it.
+
 ## Input method
 - [ ] Confirm the IME appears in Android input method settings.
 - [ ] Enable and select TVScanIME as the current input method.
