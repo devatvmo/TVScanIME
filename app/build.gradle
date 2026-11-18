@@ -10,8 +10,8 @@ android {
         applicationId 'com.example.tvscanime'
         minSdk 23
         targetSdk 28
-        versionCode 3
-        versionName '1.2.0-dev'
+        versionCode 4
+        versionName '1.2.1-dev'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
