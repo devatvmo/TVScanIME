@@ -14,7 +14,10 @@ The source has not yet been validated on a physical Android TV 14 device. Run th
 - [ ] Verify the first useful action is focused when the launcher opens.
 - [ ] Verify Back exits the launcher normally and does not trap the user.
 - [ ] Verify the QR code and address stay inside the TV safe area without scrolling.
-- [ ] Verify the IME panel is readable from a normal viewing distance, OK/Enter confirms input, and Back dismisses it.
+- [ ] Verify the IME panel is readable from a normal viewing distance and Back dismisses it.
+- [ ] In a Search/Go/Next/Done/Send field, press remote OK/Enter and verify the editor action runs once.
+- [ ] In a plain text field with no editor action, press remote OK/Enter and verify Enter is forwarded to the app.
+- [ ] Hold OK/Enter and verify key repeat does not trigger repeated submissions.
 
 ## Input method
 - [ ] Confirm the IME appears in Android input method settings.
