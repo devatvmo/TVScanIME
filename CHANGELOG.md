@@ -6,21 +6,6 @@ This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Fixed
-- TV remote OK/Enter now executes the focused editor action (Search/Go/Next/Done/Send) and falls back to forwarding Enter for plain text fields.
-- Prevented a held OK/Enter key from submitting repeatedly.
-- Preserved the standard InputMethodService Back-key dismissal behavior.
-
-### Validation
-- Added device checks for OK/Enter on action-based and plain text fields; physical Android TV verification is still pending.
-
-## [1.2.1-dev] - 2026-11-18
-
-### Fixed
-- Corrected remote OK/Enter handling in the IME service.
-
-
-
 ### Added
 - Air-mouse hover feedback for launcher actions.
 - Explicit support guidance for both D-pad remotes and pointer-based air mice.
@@ -30,11 +15,15 @@ This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - D-pad focus feedback, OK/Enter activation, IME confirmation, and Back dismissal are documented.
 
 ### Fixed
+- TV remote OK/Enter now executes the focused editor action (Search/Go/Next/Done/Send) and falls back to forwarding Enter for plain text fields.
+- Prevented a held OK/Enter key from submitting repeatedly.
+- Preserved the standard InputMethodService Back-key dismissal behavior.
 - Declared touchscreen hardware optional for TV devices.
 
 ### Validation
-- GitHub Actions compilation status is tracked per commit; physical-device checks remain pending until completed and recorded in `docs/TEST_PLAN.md`.
+- Added device checks for OK/Enter on action-based and plain text fields.
+- GitHub Actions compilation is tracked per commit; physical Android TV verification remains pending until completed and recorded in `docs/TEST_PLAN.md`.
 
 ## Release history
 
-No stable release has been published yet. The current app build is a development version: `1.2.0-dev` (version code `3`).
+No stable release has been published yet. The current app build is a development version: `1.2.1-dev` (version code `4`).
