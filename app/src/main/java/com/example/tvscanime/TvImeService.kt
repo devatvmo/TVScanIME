@@ -110,7 +110,7 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         right.addView(addressView)
         right.addView(preview)
         right.addView(TextView(this).apply {
-            text = "遥控器 OK 确认输入 · 返回键收起面板"
+            text = "遥控器 OK 确认/执行 · 返回键收起面板"
             setTextColor(0xff7d91aa.toInt())
             textSize = 12f
         })
@@ -118,8 +118,7 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         return shell
     }
 
-    // TV emulators often report a hardware keyboard, which suppresses the IME panel by default.
-    // This IME is designed to show its QR panel even when a hardware keyboard is present.
+    // Show the QR panel even on TV boxes that report a hardware keyboard.
     override fun onEvaluateInputViewShown(): Boolean = true
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
@@ -132,16 +131,27 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            val connection = currentInputConnection
-            if (connection != null) {
-                connection.finishComposingText()
-                bridge.setCurrentText("")
-                preview?.text = "已确认输入"
-                status?.text = "输入已提交"
+            // Ignore key-repeat events: a held OK button must not submit repeatedly.
+            if (event.repeatCount > 0) return true
+            val connection = currentInputConnection ?: return super.onKeyDown(keyCode, event)
+
+            // Commit the phone's composing text before asking the focused editor to act.
+            connection.finishComposingText()
+
+            // Match Android's standard IME behavior: execute the editor's configured
+            // action (Search/Go/Next/Done/Send) when present. Plain text fields often
+            // have no editor action, so forward a real Enter key event as a fallback.
+            val actionSent = sendDefaultEditorAction(true)
+            if (!actionSent) {
+                sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
             }
+
+            bridge.setCurrentText("")
+            preview?.text = if (actionSent) "已执行输入框操作" else "已确认输入"
+            status?.text = "输入已提交"
             return true
         }
-        // Keep InputMethodService's built-in Back-key behavior.
+        // Preserve InputMethodService's standard Back-key dismissal behavior.
         return super.onKeyDown(keyCode, event)
     }
 
@@ -198,10 +208,10 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
                     preview?.text = "已发送到电视"
                 }
                 "dismiss", "back" -> requestHideSelf(0)
-                "dpad_left" -> sendDownUpKeyEvents(android.view.KeyEvent.KEYCODE_DPAD_LEFT)
-                "dpad_right" -> sendDownUpKeyEvents(android.view.KeyEvent.KEYCODE_DPAD_RIGHT)
-                "dpad_up" -> sendDownUpKeyEvents(android.view.KeyEvent.KEYCODE_DPAD_UP)
-                "dpad_down" -> sendDownUpKeyEvents(android.view.KeyEvent.KEYCODE_DPAD_DOWN)
+                "dpad_left" -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT)
+                "dpad_right" -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT)
+                "dpad_up" -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP)
+                "dpad_down" -> sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN)
             }
         }
     }
