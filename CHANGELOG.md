@@ -6,6 +6,21 @@ This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+- TV remote OK/Enter now executes the focused editor action (Search/Go/Next/Done/Send) and falls back to forwarding Enter for plain text fields.
+- Prevented a held OK/Enter key from submitting repeatedly.
+- Preserved the standard InputMethodService Back-key dismissal behavior.
+
+### Validation
+- Added device checks for OK/Enter on action-based and plain text fields; physical Android TV verification is still pending.
+
+## [1.2.1-dev] - 2026-11-18
+
+### Fixed
+- Corrected remote OK/Enter handling in the IME service.
+
+
+
 ### Added
 - Air-mouse hover feedback for launcher actions.
 - Explicit support guidance for both D-pad remotes and pointer-based air mice.
