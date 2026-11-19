@@ -29,6 +29,7 @@ class LanBridge private constructor(context: Context) {
     @Volatile private var http: HttpServer? = null
     @Volatile private var socket: SocketServer? = null
     @Volatile private var currentText: String = ""
+    @Volatile private var starting: Boolean = false
 
     fun setListener(value: Listener?) { listener = value }
 
@@ -39,18 +40,32 @@ class LanBridge private constructor(context: Context) {
         broadcast(JSONObject().put("type", "sync").put("value", currentText).toString())
     }
 
+    /**
+     * Bind the local servers away from InputMethodService lifecycle callbacks.
+     * Some TV firmware has a strict timeout while enabling/binding an IME.
+     */
     @Synchronized
     fun start() {
-        try {
-            if (http == null) http = HttpServer().also {
-                it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+        if (starting || (http != null && socket != null)) return
+        starting = true
+        Thread({
+            try {
+                if (http == null) {
+                    val server = HttpServer()
+                    server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+                    http = server
+                }
+                if (socket == null) {
+                    val server = SocketServer(InetSocketAddress("0.0.0.0", 8765))
+                    server.start()
+                    socket = server
+                }
+            } catch (error: Exception) {
+                error.printStackTrace()
+            } finally {
+                starting = false
             }
-            if (socket == null) socket = SocketServer(InetSocketAddress("0.0.0.0", 8765)).also {
-                it.start()
-            }
-        } catch (error: Exception) {
-            error.printStackTrace()
-        }
+        }, "TVScanIME-LAN").start()
     }
 
     fun getUrl(): String = "http://${ipAddress()}:8766/"
