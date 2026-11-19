@@ -110,7 +110,7 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         right.addView(addressView)
         right.addView(preview)
         right.addView(TextView(this).apply {
-            text = "遥控器 OK 确认/执行 · 返回键收起面板"
+            text = "遥控器方向键和确定键由当前应用正常处理"
             setTextColor(0xff7d91aa.toInt())
             textSize = 12f
         })
@@ -129,31 +129,10 @@ class TvImeService : InputMethodService(), LanBridge.Listener {
         try { qrImage?.setImageBitmap(makeQr(url, 196)) } catch (_: Exception) { }
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            // Ignore key-repeat events: a held OK button must not submit repeatedly.
-            if (event.repeatCount > 0) return true
-            val connection = currentInputConnection ?: return super.onKeyDown(keyCode, event)
-
-            // Commit the phone's composing text before asking the focused editor to act.
-            connection.finishComposingText()
-
-            // Match Android's standard IME behavior: execute the editor's configured
-            // action (Search/Go/Next/Done/Send) when present. Plain text fields often
-            // have no editor action, so forward a real Enter key event as a fallback.
-            val actionSent = sendDefaultEditorAction(true)
-            if (!actionSent) {
-                sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-            }
-
-            bridge.setCurrentText("")
-            preview?.text = if (actionSent) "已执行输入框操作" else "已确认输入"
-            status?.text = "输入已提交"
-            return true
-        }
-        // Preserve InputMethodService's standard Back-key dismissal behavior.
-        return super.onKeyDown(keyCode, event)
-    }
+    // This IME has no TV-side key grid. Let OK/Enter and D-pad events
+    // reach the focused app instead of swallowing remote-control input.
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean =
+        super.onKeyDown(keyCode, event)
 
     override fun onDestroy() {
         if (::bridge.isInitialized) bridge.setListener(null)
