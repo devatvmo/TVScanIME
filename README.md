@@ -11,7 +11,7 @@ TVScanIME is a native Android input method for Android TV and Android TV 14 set-
 - Shows the TV's current LAN IPv4 address and HTTP port in the IME panel; the QR code opens that address directly.
 
 ## Project status
-The Android-side entry activity, LAN bridge, and IME service are Kotlin. The phone input page remains HTML/CSS/JavaScript. **A successful build and physical Android TV 14 validation are still pending.** GitHub Actions builds a debug APK on pushes and pull requests; only a successful run verifies compilation.
+The Android-side entry activity, LAN bridge, and IME service are Kotlin. The phone input page remains HTML/CSS/JavaScript. **The 1.3.0-dev debug build passes GitHub Actions; physical Android TV 14 validation is still pending.** GitHub Actions builds a debug APK on pushes and pull requests; only a successful run verifies compilation.
 
 ## Requirements
 - JDK 17
