@@ -6,6 +6,24 @@ This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+- Refined the IME lifecycle and remote-key handling after reviewing TVRemoteIME's cross-screen input architecture.
+- Moved LAN HTTP/WebSocket startup off the InputMethodService lifecycle thread.
+
+### Fixed
+- TVScanIME no longer consumes physical TV OK/Enter or D-pad events when it has no on-screen TV key grid; these keys are passed to the focused app/framework.
+- Corrected escaped newline characters in the Android manifest feature declarations.
+
+### Compatibility note
+- TVRemoteIME is GPL-2.0. Its source code, web assets, and UI were not copied; TVScanIME retains its independently implemented Kotlin/HTML interface and its own protocol.
+
+## [1.3.0-dev] - 2026-11-19
+
+### Changed
+- Reworked remote-key handling and moved LAN server startup to a background thread.
+
+
+
 ### Added
 - Air-mouse hover feedback for launcher actions.
 - Explicit support guidance for both D-pad remotes and pointer-based air mice.
