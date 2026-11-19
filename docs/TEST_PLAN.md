@@ -15,9 +15,9 @@ The source has not yet been validated on a physical Android TV 14 device. Run th
 - [ ] Verify Back exits the launcher normally and does not trap the user.
 - [ ] Verify the QR code and address stay inside the TV safe area without scrolling.
 - [ ] Verify the IME panel is readable from a normal viewing distance and Back dismisses it.
-- [ ] In a Search/Go/Next/Done/Send field, press remote OK/Enter and verify the editor action runs once.
-- [ ] In a plain text field with no editor action, press remote OK/Enter and verify Enter is forwarded to the app.
-- [ ] Hold OK/Enter and verify key repeat does not trigger repeated submissions.
+- [ ] In a Search/Go/Next/Done/Send field, press remote OK/Enter and verify the focused app receives the event and performs its normal editor action.
+- [ ] In a plain text field, press remote OK/Enter and verify the app receives the key normally.
+- [ ] Verify Up/Down/Left/Right navigation continues to work in the app while TVScanIME is visible.
 
 ## Input method
 - [ ] Confirm the IME appears in Android input method settings.
@@ -30,12 +30,14 @@ The source has not yet been validated on a physical Android TV 14 device. Run th
 - [ ] Scan the QR code and confirm the phone browser opens the input page.
 - [ ] Confirm connection status changes to connected.
 - [ ] Test Chinese composition, English, punctuation, emoji, and voice dictation.
+- [ ] Type several characters, edit in the middle, delete, then confirm; verify no duplicated or missing characters.
 - [ ] Test live updates, backspace, clear, confirm, dismiss, and cursor movement.
 - [ ] Test reconnect behavior after temporarily disabling phone Wi-Fi.
 
 ## Compatibility and security
 - [ ] Test on the intended Android TV 14 firmware and another Android TV app.
-- [ ] Check LAN IP discovery; some vendor ROMs may report `0.0.0.0`.
+- [ ] Check LAN IP discovery; some vendor ROMs may report `127.0.0.1` when no active IPv4 interface is found.
+- [ ] Verify HTTP/WebSocket listeners start successfully without delaying IME activation.
 - [ ] Check whether vendor power management stops the listeners.
 - [ ] Keep ports 8765 and 8766 on a trusted private network only.
 
