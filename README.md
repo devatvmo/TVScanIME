@@ -57,11 +57,11 @@ If using wireless debugging, use the IP and port displayed by the TV's Wireless 
 
 ## Known limitations
 - Vendor firmware can customize IME panel sizing, lifecycle, network APIs, and background execution.
-- The current code is a prototype; compatibility and input behavior must be tested on the target box.
+- The current code is a development build; compatibility and input behavior must be tested on the target box.
 - The QR code contains the direct `http://<TV-LAN-IP>:8766/` address; there is no pairing-code step.
 
 ## Versioning and release records
-- App version: `1.2.0-dev` (version code `3`); this is a development build, not a stable release.
+- App version: `1.3.0-dev` (version code `5`); this is a development build, not a stable release.
 - All user-visible changes are recorded in [CHANGELOG.md](CHANGELOG.md), following Keep a Changelog.
 - Version numbers follow Semantic Versioning; release tags use `vMAJOR.MINOR.PATCH`. See [release process](docs/RELEASE_PROCESS.md) for tagging, validation, and artifact retention.
 
